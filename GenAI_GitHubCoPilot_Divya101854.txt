@@ -1,0 +1,347 @@
+identify the technical changes to get an upgraded Enterprise system, from web application to mobile platform
+
+TestCase1 : Generate unit test case using VSTest for testing following conditions for all fields of Policy class listed here - Email should be valid expression, Account Number is 8 digit number & cannot be empty, Policy Number is 8 digit number, First Name is 50 character n on-empty string, Last Name is 50 character non-empty string, Postal Code is 7 digit number, Phone is valid phone number format, Producer Code is 5 character not empty string, Group Code is 5 character not empty string, Master Code is 5 character not empty string, City is 20 character non-empty string, State is 20 character non-empty string, Effective Date is valid date format less than or equal to current date, Expiration Date is valid date format greater than or equal to current date, Annual Premium decimal type with 2 decimal places non zero v alue
+Solution : Policy Class (Assumed Structure)
+public class Policy
+{
+    public string Email { get; set; }
+    public string AccountNumber { get; set; }
+    public string PolicyNumber { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string PostalCode { get; set; }
+    public string Phone { get; set; }
+    public string ProducerCode { get; set; }
+    public string GroupCode { get; set; }
+    public string MasterCode { get; set; }
+    public string City { get; set; }
+    public string State { get; set; }
+    public DateTime EffectiveDate { get; set; }
+    public DateTime ExpirationDate { get; set; }
+    public decimal AnnualPremium { get; set; }
+}
+
+Unit Test Class
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Text.RegularExpressions;
+
+[TestClass]
+public class PolicyTests
+{
+    [TestMethod]
+    public void TestPolicyFields()
+    {
+        var policy = new Policy
+        {
+            Email = "test@example.com",
+            AccountNumber = "12345678",
+            PolicyNumber = "87654321",
+            FirstName = "John",
+            LastName = "Doe",
+            PostalCode = "1234567",
+            Phone = "+1-800-555-1234",
+            ProducerCode = "ABCDE",
+            GroupCode = "FGHIJ",
+            MasterCode = "KLMNO",
+            City = "SampleCity",
+            State = "SampleState",
+            EffectiveDate = DateTime.Now.AddDays(-1),
+            ExpirationDate = DateTime.Now.AddDays(1),
+            AnnualPremium = 1234.56m
+        };
+
+        // Email validation
+        Assert.IsTrue(Regex.IsMatch(policy.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"), "Invalid Email");
+
+        // Account Number validation
+        Assert.IsTrue(Regex.IsMatch(policy.AccountNumber, @"^\d{8}$"), "Invalid Account Number");
+        Assert.IsFalse(string.IsNullOrEmpty(policy.AccountNumber), "Account Number cannot be empty");
+
+        // Policy Number validation
+        Assert.IsTrue(Regex.IsMatch(policy.PolicyNumber, @"^\d{8}$"), "Invalid Policy Number");
+
+        // First Name validation
+        Assert.IsTrue(policy.FirstName.Length <= 50 && !string.IsNullOrEmpty(policy.FirstName), "Invalid First Name");
+
+        // Last Name validation
+        Assert.IsTrue(policy.LastName.Length <= 50 && !string.IsNullOrEmpty(policy.LastName), "Invalid Last Name");
+
+        // Postal Code validation
+        Assert.IsTrue(Regex.IsMatch(policy.PostalCode, @"^\d{7}$"), "Invalid Postal Code");
+
+        // Phone validation
+        Assert.IsTrue(Regex.IsMatch(policy.Phone, @"^\+?[1-9]\d{1,14}$"), "Invalid Phone Number");
+
+        // Producer Code validation
+        Assert.IsTrue(policy.ProducerCode.Length == 5 && !string.IsNullOrEmpty(policy.ProducerCode), "Invalid Producer Code");
+
+        // Group Code validation
+        Assert.IsTrue(policy.GroupCode.Length == 5 && !string.IsNullOrEmpty(policy.GroupCode), "Invalid Group Code");
+
+        // Master Code validation
+        Assert.IsTrue(policy.MasterCode.Length == 5 && !string.IsNullOrEmpty(policy.MasterCode), "Invalid Master Code");
+
+        // City validation
+        Assert.IsTrue(policy.City.Length <= 20 && !string.IsNullOrEmpty(policy.City), "Invalid City");
+
+        // State validation
+        Assert.IsTrue(policy.State.Length <= 20 && !string.IsNullOrEmpty(policy.State), "Invalid State");
+
+        // Effective Date validation
+        Assert.IsTrue(policy.EffectiveDate <= DateTime.Now, "Invalid Effective Date");
+
+        // Expiration Date validation
+        Assert.IsTrue(policy.ExpirationDate >= DateTime.Now, "Invalid Expiration Date");
+
+        // Annual Premium validation
+        Assert.IsTrue(policy.AnnualPremium > 0 && decimal.Round(policy.AnnualPremium, 2) == policy.AnnualPremium, "Invalid Annual Premium");
+    }
+}
+
+
+
+Tescase 2 : 
+#editor Refactor code to implement dependency injection using Autofac library
+To refactor the PolicyController to implement dependency injection using the Autofac library, follow these steps:
+
+
+Add Autofac Dependency: Add the Autofac dependency to your pom.xml file.
+Create an Autofac Module: Define a module to register your dependencies.
+Configure Autofac in the Spring Boot application: Use Autofac as the IoC container.
+Here’s the refactored code:
+
+
+1. Add Autofac Dependency
+Add the following dependency to your pom.xml:
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+
+TestCase 3: Refactor CalculateTotalPremium method to resolve cyclomatic complexity issue
+To refactor the CalculateTotalPremium method and reduce its cyclomatic complexity, you can break down the logic into smaller, more manageable methods. Each method will handle a specific part of the calculation, making the code easier to read, test, and maintain.
+Example Refactored Code
+public class PremiumCalculator {
+
+    public double calculateTotalPremium(Policy policy) {
+        double basePremium = calculateBasePremium(policy);
+        double discount = calculateDiscount(policy);
+        double surcharge = calculateSurcharge(policy);
+
+        return basePremium - discount + surcharge;
+    }
+
+    private double calculateBasePremium(Policy policy) {
+        // Logic to calculate the base premium
+        if (policy.getCoverageType().equals("Comprehensive")) {
+            return 500.0;
+        } else if (policy.getCoverageType().equals("ThirdParty")) {
+            return 300.0;
+        }
+        return 0.0;
+    }
+
+    private double calculateDiscount(Policy policy) {
+        // Logic to calculate discounts
+        double discount = 0.0;
+        if (policy.isNoClaimBonus()) {
+            discount += 50.0;
+        }
+        if (policy.getCustomerAge() > 50) {
+            discount += 30.0;
+        }
+        return discount;
+    }
+
+    private double calculateSurcharge(Policy policy) {
+        // Logic to calculate surcharges
+        double surcharge = 0.0;
+        if (policy.isHighRiskArea()) {
+            surcharge += 100.0;
+        }
+        if (policy.getVehicleAge() > 10) {
+            surcharge += 50.0;
+        }
+        return surcharge;
+    }
+}
+
+Explanation
+Decomposition: The method is split into three smaller methods: calculateBasePremium, calculateDiscount, and calculateSurcharge.
+Readability: Each method has a single responsibility, making the code easier to understand.
+Testability: Each method can be tested independently, improving maintainability.
+Reduced Cyclomatic Complexity: By delegating logic to helper methods, the complexity of the main method is reduced.
+
+TestCase 4 : Identify coding standards issue
+Here are some coding standards issues in the provided PolicyController class:
+
+
+Lack of Input Validation:
+
+
+The createPolicy method does not validate the Policy object for null or invalid data before passing it to the service layer.
+Error Handling:
+
+
+The getPolicyById and getPolicyWithClaims methods return 404 Not Found if the policy is null, but no specific error message is provided to the client.
+Magic Strings:
+
+
+The response messages like "Policy created successfully" are hardcoded. These should be replaced with constants or messages from a properties file for better maintainability.
+Method Naming:
+
+
+The method getPolicyWithClaims could be renamed to something more descriptive, such as getPolicyDetailsWithClaims, to better reflect its purpose.
+Logging:
+
+
+There is no logging in the controller methods to track requests, responses, or errors, which is essential for debugging and monitoring.
+HTTP Status Codes:
+
+
+The createPolicy method always returns 201 Created, even if the Policy object is invalid. Proper status codes like 400 Bad Request should be used for invalid input.
+Code Comments:
+
+
+There are no comments explaining the purpose of the methods or the logic, which can make the code harder to understand for other developers.
+Dependency Injection:
+
+
+While the PolicyService is injected via the constructor, there is no interface abstraction. Using an interface for the service would improve testability and flexibility.
+By addressing these issues, the code can be made more robust, maintainable, and aligned with standard coding practices.
+
+Testcase 5 : Refactor code to reduce repetitive or unwanted method calls
+
+To reduce repetitive or unwanted method calls in the PolicyController class, we can refactor the code by introducing helper methods for common logic, such as null checks and response handling. Here's the refactored code:
+Refactored Code
+package com.vm.policy.controller;
+
+import com.vm.policy.model.Policy;
+import com.vm.policy.service.PolicyService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/policies")
+public class PolicyController {
+
+    private final PolicyService policyService;
+
+    public PolicyController(PolicyService policyService) {
+        this.policyService = policyService;
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<String> createPolicy(@RequestBody Policy policy) {
+        if (policy == null) {
+            return ResponseEntity.badRequest().body("Policy object cannot be null");
+        }
+        policyService.createPolicy(policy);
+        return ResponseEntity.status(201).body("Policy created successfully");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Policy> getPolicyById(@PathVariable Long id) {
+        return handlePolicyResponse(policyService.getPolicyById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Policy>> getAllPolicies() {
+        List<Policy> policies = policyService.getAllPolicies();
+        return ResponseEntity.ok(policies);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Policy>> getPoliciesByUser(@PathVariable Long userId) {
+        List<Policy> policies = policyService.getPoliciesByUser(userId);
+        return ResponseEntity.ok(policies);
+    }
+
+    @GetMapping("/{policyId}/details")
+    public ResponseEntity<Policy> getPolicyWithClaims(@PathVariable Long policyId) {
+        return handlePolicyResponse(policyService.getPolicyWithClaims(policyId));
+    }
+
+    private ResponseEntity<Policy> handlePolicyResponse(Policy policy) {
+        if (policy == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(policy);
+    }
+}
+
+Testcase 6 : Refactor GoogleMapsService code for performance optimization & caching responses using redis cache
+To optimize the GoogleMapsService for performance and implement caching using Redis, you can use the Spring Boot Redis integration. Below is a refactored example:
+Steps:
+Add Redis Dependency: Add the Redis dependency to your pom.xml.
+Enable Caching: Use Spring's caching abstraction with Redis as the cache provider.
+Configure Redis: Add Redis configuration in application.properties.
+Refactor Service: Annotate methods with @Cacheable to cache responses.
+1. Add Redis Dependency
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+
+2. Configure Redis in application.properties
+spring.cache.type=redis
+spring.redis.host=localhost
+spring.redis.port=6379
+spring.redis.timeout=6000
+
+
+3. Enable Caching in the Application
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+
+@SpringBootApplication
+@EnableCaching
+public class InsurancePolicyManagementServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(InsurancePolicyManagementServiceApplication.class, args);
+    }
+}
+4. Refactor GoogleMapsService
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class GoogleMapsService {
+
+    private final RestTemplate restTemplate;
+
+    public GoogleMapsService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @Cacheable(value = "geocodeCache", key = "#address", unless = "#result == null")
+    public String getGeocode(String address) {
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + address + "&key=YOUR_API_KEY";
+        return restTemplate.getForObject(url, String.class);
+    }
+
+    @Cacheable(value = "distanceCache", key = "#origin + '-' + #destination", unless = "#result == null")
+    public String getDistance(String origin, String destination) {
+        String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + origin + "&destinations=" + destination + "&key=YOUR_API_KEY";
+        return restTemplate.getForObject(url, String.class);
+    }
+}
